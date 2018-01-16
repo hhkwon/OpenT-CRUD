@@ -32,6 +32,7 @@ app.post('/upload', upload.single('userfile'), function(req, res){
   res.send('Uploaded : '+req.file.filename);
 });
 
+
 app.get('/topic/add', function(req, res){
   var sql = 'SELECT id,title FROM topic';
   conn.query(sql, function(err, topics, fields){
@@ -42,6 +43,27 @@ app.get('/topic/add', function(req, res){
     res.render('add', {topics: topics});
   });
 });
+
+app.get(['/topic', '/topic/:id'], function(req, res){
+  var sql = 'SELECT id,title FROM topic';
+  conn.query(sql, function(err, topics, fields){
+    var id = req.params.id;
+    if(id){
+      var sql="SELECT * FROM topic WHERE id=?";
+      conn.query(sql, [id], function ( err, topic, fields ){
+        if(err){
+          console.log(err);
+          res.status(500).send('Internal Server Error')
+        } else {
+          res.render( 'view', {topics: topics, topic: topic[0] });
+        }
+      })
+    } else {
+      res.render('view', {topics: topics});
+    }
+  });
+});
+
 app.post('/topic/add', function(req, res){
   var title = req.body.title;
   var description = req.body.description;
@@ -58,8 +80,7 @@ app.post('/topic/add', function(req, res){
   })
 })
 
-
-app.get(['/topic', '/topic/:id'], function(req, res){
+app.get(['/topic/:id/edit'], function(req, res){
   var sql = 'SELECT id,title FROM topic';
   conn.query(sql, function(err, topics, fields){
     var id = req.params.id;
@@ -70,16 +91,31 @@ app.get(['/topic', '/topic/:id'], function(req, res){
           console.log(err);
           res.status(500).send('Internal Server Error')
         } else {
-          console.log(topic)
-          res.render( 'view', {topics: topics, topic: topic[0] });
+          res.render( 'edit', {topics: topics, topic: topic[0] });
         }
       })
     } else {
-      res.render('view', {topics: topics});
+      console.log('There is no id.');
+      res.status(500).send('Internal Server Error');
     }
   });
 });
 
+app.post(['/topic/:id/edit'], function(req, res){
+  var sql = 'UPDATE topic SET title=?, description=?, author=? WHERE id=?'
+  var title = req.body.title;
+  var description = req.body.description;
+  var author = req.body.author;
+  var id = req.params.id;
+  conn.query(sql, [title, description, author, id], function(err, result, fields){
+    if(err){
+      console.log(err);
+      res.status(500).send('Internal Server Error')
+    } else {
+      res.redirect('/topic/'+id);
+    };
+  });
+});
 
 app.listen(3000, function(){
   console.log('Connected, 3000 port!');
