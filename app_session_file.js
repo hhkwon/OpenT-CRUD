@@ -5,9 +5,9 @@ var bodyParser = require('body-parser')
 var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(function (req, res, next) {
-  return setTimeout(() => next(), 100);
-})
+// app.use(function (req, res, next) {
+//   return setTimeout(() => next(), 100);
+// })
 
 app.use(session({
   store: new FileStore(),
@@ -31,7 +31,9 @@ app.get('/count', function(req,res){
 // 로그인 버튼 화면 표시
 app.get('/auth/logout', function(req, res){
   delete req.session.displayName;
-  res.redirect('/welcome')
+  req.session.save(function(){
+    res.redirect('/welcome')
+  })
 })
 
 // 셋째,
@@ -66,7 +68,9 @@ app.post('/auth/login', function(req, res){
   var pwd = req.body.password;
   if(uname === user.username && pwd === user.password){
     req.session.displayName = user.displayName;
-    res.redirect('/welcome');
+    req.session.save(function(){
+      res.redirect('/welcome');
+    })
   } else {
     res.send('Who Are you? <a href="/auth/login">login</a>');
   }
