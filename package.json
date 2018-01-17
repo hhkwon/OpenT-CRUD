@@ -27,6 +27,7 @@
     "mysql": "^2.15.0",
     "orientjs": "^2.1.11",
     "passport": "^0.4.0",
+    "passport-facebook": "^2.1.1",
     "passport-local": "^1.0.0",
     "pbkdf2-password": "^1.2.1",
     "session-file-store": "^1.2.0",
