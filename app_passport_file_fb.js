@@ -166,9 +166,11 @@ passport.use(new LocalStrategy(
 //// 있으면 return으로 빠져나옴.
 //// 없으면 newuser에 정보를 담아서 users DB에 PUSH한 후에 newuser를 반환
 passport.use(new FacebookStrategy({
-  clientID: '1874065032903590',
-  clientSecret: '8be4344b9c77b568ad9bb21644cbc7d8',
-  callbackURL: "/auth/facebook/callback"
+  clientID: '1874065032903590', // *** I will delete this ID. ****
+  clientSecret: '8be4344b9c77b568ad9bb21644cbc7d8', // *** I have changed this key already :) ****
+  callbackURL: "/auth/facebook/callback",
+      //// pspt-fb-12 profilefields로 해서 추가 scope 정보를 받아옴
+  profileFields: ['id', 'displayName', 'name', 'gender', 'profileUrl', 'emails', 'photos']
 },
 function(accessToken, refreshToken, profile, done) {
   console.log('FB!!', profile);
@@ -181,7 +183,9 @@ function(accessToken, refreshToken, profile, done) {
   }
   var newuser = {
     'authId' : authId,
-    'displayName': profile.displayName
+    'displayName': profile.displayName,
+          //// pspt-fb-13 이메일도 DB에 설정 받아오자!
+    'email': profile.emails[0].value
   }
   users.push(newuser);
   done(null, newuser);
@@ -200,7 +204,10 @@ app.post('/auth/login',
 //// pspt-fb-3 FACEBOOK 으로 들어오면 facebook 전략을 쓰겠다!
 app.get('/auth/facebook', 
   passport.authenticate(
-    'facebook'
+    'facebook',
+    //// pspt-fb-11 기본으로 쏴주는 정보 외에도 다른 정보도 한번 가져와보자!
+    //// 아래 scope를 넣은 다음에 위에 strategy도 profilefields설정해야함
+    {scope:'email'}
   )
 );
 
